@@ -42,6 +42,14 @@ if not 'System.out.print' in last_instr and not last_instr.startswith('}'):
         Stream<?> ϟ = null;
         if(ಠ_ಠ instanceof Object[]) {
             ϟ = Arrays.stream((Object[]) ಠ_ಠ);
+
+        } else if(ಠ_ಠ instanceof int[]) {
+            ϟ = Arrays.stream((int[]) ಠ_ಠ).mapToObj(i -> Integer.valueOf(i));
+        } else if(ಠ_ಠ instanceof long[]) {
+            ϟ = Arrays.stream((long[]) ಠ_ಠ).mapToObj(i -> Long.valueOf(i));
+        } else if(ಠ_ಠ instanceof double[]) {
+            ϟ = Arrays.stream((double[]) ಠ_ಠ).mapToObj(i -> Double.valueOf(i));
+
         } else if(ಠ_ಠ instanceof Collection<?>) {
             ϟ = ((Collection<?>) ಠ_ಠ).stream();
         } else if(ಠ_ಠ instanceof Stream<?>) {
