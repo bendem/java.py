@@ -1,8 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-# TODO Support primitive arrays
-
 import os
 import subprocess
 import sys
