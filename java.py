@@ -9,7 +9,10 @@ if len(sys.argv) == 1:
     print(' Plz, usage is ./java.py "<code>"')
     sys.exit()
 
+pretty = False
 setup = ''
+code_args = []
+
 arg_it = iter(sys.argv)
 next(arg_it)
 try:
@@ -17,9 +20,11 @@ try:
         x = next(arg_it)
         if x == '-s':
             setup = next(arg_it)
-            sys.argv.remove(x)
-            sys.argv.remove(setup)
             setup = setup.strip(';') + ';'
+        elif x == '-p':
+            pretty = True
+        else:
+            code_args.append(x)
 except StopIteration:
     pass
 
@@ -29,7 +34,7 @@ SOURCE   = '%s.java' % CLASS
 COMPILED = '%s.class' % CLASS
 
 # something something backslash something
-code = ' '.join(sys.argv[1:]).strip(';').replace('\\', '\\\\').split(';')
+code = ' '.join(code_args).strip(';').replace('\\', '\\\\').split(';')
 last_instr = code[-1].strip()
 output = ''
 
@@ -59,11 +64,11 @@ if not 'System.out.print' in last_instr and not last_instr.startswith('}'):
         } else {
             System.out.println(
                 ϟ
-                    .map(Object::toString)
-                    .collect(Collectors.joining("', '", "['", "']"))
+                    .map(item -> item == null ? null : "'" + item.toString() + "'")
+                    .collect(Collectors.joining(",%s", "[", "]"))
             );
         }
-    """ % code[-1]
+    """ % (code[-1], ('\\n' if pretty else ' '))
     del code[-1]
 
 with open('%s/%s' % (OUT, SOURCE), 'w') as f:
