@@ -6,7 +6,11 @@ import subprocess
 import sys
 
 if len(sys.argv) == 1:
-    print(' Plz, usage is ./java.py "<code>"')
+    print(' Usage is ./java.py [options] <code>')
+    print()
+    print(' Options are:')
+    print('    -p  Pretty output')
+    print('    -s  Setup code to put before the class declaration (i.e. imports)')
     sys.exit()
 
 pretty = False
