@@ -39,3 +39,7 @@ $ java.py -p 'Random r = new Random(); Stream.generate(r::nextInt).limit(5)'
  >> 5521057,
  >> -366992486]
 ```
+
+### Requirements
+
+Requires java 8 and python 3 to work.
