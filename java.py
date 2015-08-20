@@ -72,10 +72,13 @@ if not 'System.out.print' in last_instr and not last_instr.startswith('}'):
                         if(ツ == null) {
                             return "null";
                         }
+                        if(ツ instanceof Character) {
+                            return "'" + ツ + "'";
+                        }
                         if(ツ instanceof Number) {
                             return ツ.toString();
                         }
-                        return "'" + ツ + "'";
+                        return "\\"" + ツ + '"';
                     })
                     .collect(Collectors.joining(",%s", "[", "]"))
             );
