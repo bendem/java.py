@@ -51,11 +51,11 @@ if not 'System.out.print' in last_instr and not last_instr.startswith('}'):
             ϟ = Arrays.stream((Object[]) ಠ_ಠ);
 
         } else if(ಠ_ಠ instanceof int[]) {
-            ϟ = Arrays.stream((int[]) ಠ_ಠ).mapToObj(i -> Integer.valueOf(i));
+            ϟ = Arrays.stream((int[]) ಠ_ಠ).mapToObj(Integer::valueOf);
         } else if(ಠ_ಠ instanceof long[]) {
-            ϟ = Arrays.stream((long[]) ಠ_ಠ).mapToObj(i -> Long.valueOf(i));
+            ϟ = Arrays.stream((long[]) ಠ_ಠ).mapToObj(Long::valueOf);
         } else if(ಠ_ಠ instanceof double[]) {
-            ϟ = Arrays.stream((double[]) ಠ_ಠ).mapToObj(i -> Double.valueOf(i));
+            ϟ = Arrays.stream((double[]) ಠ_ಠ).mapToObj(Double::valueOf);
 
         } else if(ಠ_ಠ instanceof Collection<?>) {
             ϟ = ((Collection<?>) ಠ_ಠ).stream();
@@ -68,7 +68,15 @@ if not 'System.out.print' in last_instr and not last_instr.startswith('}'):
         } else {
             System.out.println(
                 ϟ
-                    .map(item -> item == null ? null : "'" + item.toString() + "'")
+                    .map(ツ -> {
+                        if(ツ == null) {
+                            return "null";
+                        }
+                        if(ツ instanceof Number) {
+                            return ツ.toString();
+                        }
+                        return "'" + ツ + "'";
+                    })
                     .collect(Collectors.joining(",%s", "[", "]"))
             );
         }
