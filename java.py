@@ -61,6 +61,13 @@ if not 'System.out.print' in last_instr and not last_instr.startswith('}'):
             ϟ = ((Collection<?>) ಠ_ಠ).stream();
         } else if(ಠ_ಠ instanceof Stream<?>) {
             ϟ = (Stream<?>) ಠ_ಠ;
+
+        } else if(ಠ_ಠ instanceof IntStream) {
+            ϟ = ((IntStream) ಠ_ಠ).boxed();
+        } else if(ಠ_ಠ instanceof LongStream) {
+            ϟ = ((LongStream) ಠ_ಠ).boxed();
+        } else if(ಠ_ಠ instanceof DoubleStream) {
+            ϟ = ((DoubleStream) ಠ_ಠ).boxed();
         }
 
         if(ϟ == null) {
@@ -89,10 +96,10 @@ if not 'System.out.print' in last_instr and not last_instr.startswith('}'):
 with open('%s/%s' % (OUT, SOURCE), 'w') as f:
     f.write(
         """
+        import java.io.*;
+        import java.math.*;
         import java.util.*;
         import java.util.stream.*;
-        import java.math.*;
-        import java.io.*;
         %s
 
         public class %s {
