@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import re
 import subprocess
 import sys
 
@@ -132,14 +133,27 @@ def parse_args(args):
     if not code_args:
         help()
 
-def generate_code():
-    # something something backslash something
-    code = ' '.join(code_args).strip(';').replace('\\', '\\\\').split(';')
+def generate_code(code):
+    # Splitting on ; is really horrible and breaks in many cases but
+    # it's a fair trade compared to the complexity of writing a parser
+    code = code.strip(';').split(';')
     last_instr = code[-1].strip()
     output = ''
 
+    if '=' in last_instr:
+        to_print = last_instr.split('=')[0].strip()
+
+        # Extracts var name from declarations like "int a"
+        # or "Map<String, String> a"
+        if ' ' in to_print:
+            r = re.compile(r'^.+\s+([^ ]+)$').match(to_print).group(1)
+            to_print = ' '.join(r)
+
+        code.append(to_print)
+        last_instr = to_print
+
     # Auto display formatting thingy stuff
-    if not 'System.out.print' in last_instr and not last_instr.startswith('}'):
+    if not 'print' in last_instr and not last_instr.endswith('}'):
         output = OUTPUT_CODE_TEMPLATE % (code[-1], ('\\n' if pretty else ' '))
         del code[-1]
 
@@ -198,7 +212,8 @@ def cleanup(compiled = True):
 
 if __name__ == '__main__':
     parse_args(sys.argv)
-    write_to_file(generate_code(), '%s/%s' % (OUT, SOURCE))
+    code = generate_code(' '.join(code_args))
+    write_to_file(code, '%s/%s' % (OUT, SOURCE))
     if compile():
         run()
         cleanup()
