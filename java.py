@@ -114,7 +114,19 @@ with open('%s/%s' % (OUT, SOURCE), 'w') as f:
         """
         import java.io.*;
         import java.math.*;
+        import java.nio.*;
+        import java.nio.charset.*;
+        import java.nio.file.*;
+        import java.time.*;
+        import java.time.chrono.*;
+        import java.time.format.*;
+        import java.time.temporal.*;
+        import java.time.zone.*;
         import java.util.*;
+        import java.util.concurrent.*;
+        import java.util.concurrent.atomic.*;
+        import java.util.concurrent.locks.*;
+        import java.util.function.*;
         import java.util.stream.*;
         %s
 
