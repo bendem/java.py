@@ -5,16 +5,24 @@ import os
 import subprocess
 import sys
 
-if len(sys.argv) == 1:
+def help():
     print(' Usage is ./java.py [options] <code>')
     print()
     print(' Options are:')
     print('    -p  Pretty output')
     print('    -s  Setup code to put before the class declaration (i.e. imports)')
+    print('    -h  Prints this help message')
+    print('    -v  Prints the commands used to compile and execute the script')
+    print('    -cp Adds a jar to the classpath')
     sys.exit()
 
-pretty = False
-setup = ''
+if len(sys.argv) == 1:
+    help()
+
+verbose   = False
+pretty    = False
+setup     = ''
+classpath = []
 code_args = []
 
 arg_it = iter(sys.argv)
@@ -27,15 +35,23 @@ try:
             setup = setup.strip(';') + ';'
         elif x == '-p':
             pretty = True
+        elif x == '-v':
+            verbose = True
+        elif x == '-cp':
+            classpath.append(next(arg_it))
+        elif x == '-h' or x == '--help':
+            help()
         else:
             code_args.append(x)
 except StopIteration:
     pass
 
-OUT      = '/tmp'
-CLASS    = 'Paul'
-SOURCE   = '%s.java' % CLASS
-COMPILED = '%s.class' % CLASS
+OUT        = '/tmp'
+CLASS      = 'Paul'
+SOURCE     = '%s.java' % CLASS
+COMPILED   = '%s.class' % CLASS
+javac_args = ''
+java_args  = ''
 
 # something something backslash something
 code = ' '.join(code_args).strip(';').replace('\\', '\\\\').split(';')
@@ -111,12 +127,17 @@ with open('%s/%s' % (OUT, SOURCE), 'w') as f:
         """ % (setup, CLASS, ';'.join(code), output)
     )
 
-p = subprocess.Popen(
-    'javac -nowarn -d %s %s/%s' % (OUT, OUT, SOURCE),
-    shell = True,
-    stdout = subprocess.PIPE,
-    stderr = subprocess.STDOUT
-)
+javac_args += ' -nowarn'
+if classpath:
+    javac_args += ' -cp %s' % ':'.join(classpath)
+
+javac = 'javac %s -d %s %s/%s' % (javac_args, OUT, OUT, SOURCE)
+
+if verbose:
+    print('%% %s' % javac.replace('  ', ' '))
+
+p = subprocess.Popen(javac, shell = True, stdout = subprocess.PIPE,
+    stderr = subprocess.STDOUT)
 
 for line in p.stdout.readlines():
     print(' | %s' % line.decode().strip())
@@ -126,12 +147,15 @@ if p.wait() != 0:
     os.remove('%s/%s' % (OUT, SOURCE))
     sys.exit(-1)
 
-execution = subprocess.Popen(
-    'java -cp %s %s' % (OUT, CLASS),
-    shell = True,
-    stdout = subprocess.PIPE,
-    stderr = subprocess.STDOUT
-)
+
+java_args += ' -cp %s' % ':'.join(classpath + [OUT])
+java = 'java %s %s' % (java_args, CLASS)
+
+if verbose:
+    print('%% %s' % java.replace('  ', ' '))
+
+execution = subprocess.Popen(java, shell = True, stdout = subprocess.PIPE,
+    stderr = subprocess.STDOUT)
 
 for line in execution.stdout.readlines():
     print(' >> %s' % line.decode().strip())
