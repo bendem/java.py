@@ -8,6 +8,7 @@ import sys
 
 verbose   = False
 pretty    = False
+raw       = False
 setup     = ''
 classpath = []
 code_args = []
@@ -100,11 +101,12 @@ def help():
     print('    -s  Setup code to put before the class declaration (i.e. imports)')
     print('    -h  Prints this help message')
     print('    -v  Prints the commands used to compile and execute the script')
+    print('    -r  Prevents adding some code to display the result of the last operation')
     print('    -cp Adds a jar to the classpath')
     sys.exit()
 
 def parse_args(args):
-    global verbose, pretty, setup, classpath, code_args
+    global verbose, pretty, setup, classpath, code_args, raw
 
     if len(args) == 1:
         help()
@@ -121,6 +123,8 @@ def parse_args(args):
                 pretty = True
             elif x == '-v':
                 verbose = True
+            elif x == '-r':
+                raw = True
             elif x == '-cp':
                 classpath.append(next(arg_it))
             elif x == '-h' or x == '--help':
@@ -153,7 +157,7 @@ def generate_code(code):
         last_instr = to_print
 
     # Auto display formatting thingy stuff
-    if not 'print' in last_instr and not last_instr.endswith('}'):
+    if not raw and not 'print' in last_instr and not last_instr.endswith('}'):
         output = OUTPUT_CODE_TEMPLATE % (code[-1], ('\\n' if pretty else ' '))
         del code[-1]
 
