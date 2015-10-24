@@ -46,6 +46,9 @@ try:
 except StopIteration:
     pass
 
+if not code_args:
+    help()
+
 OUT        = '/tmp'
 CLASS      = 'Paul'
 SOURCE     = '%s.java' % CLASS
