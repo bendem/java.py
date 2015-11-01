@@ -144,7 +144,7 @@ def generate_code(code):
     last_instr = code[-1].strip()
     output = ''
 
-    if '=' in last_instr:
+    if not raw and '=' in last_instr:
         to_print = last_instr.split('=')[0].strip()
 
         # Extracts var name from declarations like "int a"
