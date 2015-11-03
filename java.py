@@ -47,6 +47,15 @@ TEMPLATE   = """
     """
 OUTPUT_CODE_TEMPLATE = """
     Object ಠ_ಠ = %s;
+    String ᴥ = "null";
+    if(ಠ_ಠ != null) {
+        if(ಠ_ಠ.getClass().getName().startsWith("java.lang.")) {
+            ᴥ = ಠ_ಠ.getClass().getSimpleName();
+        } else {
+            ᴥ = ಠ_ಠ.getClass().getName();
+        }
+    }
+
     Stream<?> ϟ = null;
     if(ಠ_ಠ instanceof Object[]) {
         ϟ = Arrays.stream((Object[]) ಠ_ಠ);
@@ -72,8 +81,9 @@ OUTPUT_CODE_TEMPLATE = """
     }
 
     if(ϟ == null) {
-        System.out.println(ಠ_ಠ);
+        System.out.println("(" + ᴥ + ") " + ಠ_ಠ);
     } else {
+        System.out.printf("(" + ᴥ + ") ");
         System.out.println(
             ϟ
                 .map(ツ -> {
