@@ -147,9 +147,6 @@ def parse_args(args):
     if not code_args:
         help()
 
-def insert_new_lines(code):
-    return code.replace(').', ')\n.').replace(';', ';\n')
-
 def generate_code(code):
     # Splitting on ; is really horrible and breaks in many cases but
     # it's a fair trade compared to the complexity of writing a parser
@@ -171,10 +168,10 @@ def generate_code(code):
 
     # Auto display formatting thingy stuff
     if not raw and not 'print' in last_instr and not last_instr.endswith('}'):
-        output = OUTPUT_CODE_TEMPLATE % (insert_new_lines(code[-1]), ('\\n' if pretty else ' '))
+        output = OUTPUT_CODE_TEMPLATE % (code[-1], ('\\n' if pretty else ' '))
         del code[-1]
 
-    return TEMPLATE % (setup, CLASS, insert_new_lines(';'.join(code)), output)
+    return TEMPLATE % (setup, CLASS, ';'.join(code), output)
 
 def write_to_file(code, file):
     # with open('%s/%s' % (OUT, SOURCE), 'w') as f:
