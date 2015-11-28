@@ -174,16 +174,40 @@ def generate_code(code):
     return TEMPLATE % (setup, CLASS, ';'.join(code), output)
 
 def write_to_file(code, file):
-    # with open('%s/%s' % (OUT, SOURCE), 'w') as f:
     with open(file, 'w') as f:
         f.write(code)
 
-def compile():
+def which(name):
+    for path in os.getenv('PATH').split(os.pathsep):
+        file = os.path.join(path, name)
+        if os.path.isfile(file) and os.access(file, os.X_OK):
+            return file
+
+    return None
+
+def dirname(name, count):
+    for i in range(count):
+        name = os.path.dirname(name)
+
+    return name
+
+def find_java_home():
+    java_home = os.getenv('JAVA_HOME')
+    if java_home:
+        return java_home
+
+    java_home = which('javac')
+    if java_home:
+        return dirname(java_home, 2)
+
+    return None
+
+def compile(javac):
     args = javac_args + ' -nowarn'
     if classpath:
         args += ' -cp %s' % ':'.join(classpath)
 
-    javac = 'javac %s -d %s %s/%s' % (args, OUT, OUT, SOURCE)
+    javac = '%s %s -d %s %s/%s' % (javac, args, OUT, OUT, SOURCE)
     javac = javac.replace('  ', ' ')
 
     if verbose:
@@ -203,9 +227,9 @@ def compile():
 
     return True
 
-def run():
+def run(java):
     args = java_args + ' -cp %s' % ':'.join(classpath + [OUT])
-    java = 'java %s %s' % (args, CLASS)
+    java = '%s %s %s' % (java, args, CLASS)
     java = java.replace('  ', ' ')
 
     if verbose:
@@ -226,8 +250,13 @@ def cleanup(compiled = True):
 
 if __name__ == '__main__':
     parse_args(sys.argv)
+    java_home = find_java_home()
+    if not java_home:
+        print(' Java home not found, aborting...')
+        os.exit(1)
+
     code = generate_code(' '.join(code_args))
     write_to_file(code, '%s/%s' % (OUT, SOURCE))
-    if compile():
-        run()
+    if compile('%s/bin/javac' % java_home):
+        run('%s/bin/java' % java_home)
         cleanup()
