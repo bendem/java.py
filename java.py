@@ -47,14 +47,12 @@ TEMPLATE   = """
             %s
         }
 
-        public static Void p(Object obj) {
+        public static void p(Object obj) {
             System.out.println(obj.toString());
-            return null;
         }
 
-        public static Void p(String format, Object... params) {
+        public static void p(String format, Object... params) {
             System.out.println(String.format(format, params));
-            return null;
         }
 
     }
@@ -184,7 +182,9 @@ def generate_code(code):
         last_instr = to_print
 
     # Auto display formatting thingy stuff
-    if not raw and not 'print' in last_instr and not last_instr.endswith('}'):
+    if not raw \
+            and not last_instr.startswith('p(') \
+            and not last_instr.endswith('}'):
         output = OUTPUT_CODE_TEMPLATE % (code[-1], ('\\n' if pretty else ' '))
         del code[-1]
 
