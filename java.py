@@ -80,7 +80,8 @@ OUTPUT_CODE_TEMPLATE = """
         ϟ = Arrays.stream((double[]) ಠ_ಠ).mapToObj(Double::valueOf);
 
     } else if(ಠ_ಠ instanceof Map<?, ?>) {
-        ϟ = ((Map<?, ?>) ಠ_ಠ).entrySet().stream().map(e -> String.format("%%s: %%s", e.getKey(), e.getValue()));
+        ϟ = ((Map<?, ?>) ಠ_ಠ).entrySet().stream()
+            .map(e -> String.format("%%s: %%s", e.getKey(), e.getValue()));
 
     } else if(ಠ_ಠ instanceof Collection<?>) {
         ϟ = ((Collection<?>) ಠ_ಠ).stream();
