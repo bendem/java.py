@@ -119,15 +119,24 @@ OUTPUT_CODE_TEMPLATE = """
 """
 
 def help():
+    print()
     print(' Usage is ./java.py [options] <code>')
     print()
     print(' Options are:')
-    print('    -p  Pretty output')
-    print('    -s  Setup code to put before the class declaration (i.e. imports)')
-    print('    -h  Prints this help message')
-    print('    -v  Prints the commands used to compile and execute the script')
-    print('    -r  Prevents adding some code to display the result of the last operation')
-    print('    -cp Adds a jar to the classpath')
+    print()
+    print('    -p  Pretty output (in case of program result convertible to stream, each item will be printed on a new line).')
+    print()
+    print('    -s  Setup code to put before the class declaration (i.e. imports or class definitions).')
+    print()
+    print('    -h  Prints this help message.')
+    print()
+    print('    -v  Prints the commands used to compile and execute the script.')
+    print()
+    print('    -r  Prevents adding some code to display the result of the last operation and replaces strip calls applied')
+    print('        to each line of the program output with rstrip.')
+    print()
+    print('    -cp Adds a jar to the classpath.')
+    print()
     sys.exit()
 
 def parse_args(args):
