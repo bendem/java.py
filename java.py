@@ -25,6 +25,7 @@ TEMPLATE   = """
     import java.nio.*;
     import java.nio.charset.*;
     import java.nio.file.*;
+    import java.security.*;
     import java.time.*;
     import java.time.chrono.*;
     import java.time.format.*;
@@ -36,6 +37,8 @@ TEMPLATE   = """
     import java.util.concurrent.locks.*;
     import java.util.function.*;
     import java.util.stream.*;
+    import javax.crypto.*;
+    import javax.crypto.spec.*;
     %s
 
     public class %s {
