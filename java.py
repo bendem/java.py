@@ -256,7 +256,12 @@ def run(java):
         stderr = subprocess.STDOUT)
 
     for line in execution.stdout.readlines():
-        print(' >> %s' % line.decode().strip())
+        l = line.decode()
+        if raw:
+            l = l.rstrip()
+        else:
+            l = l.strip()
+        print(' >> %s' % l)
 
     execution.wait()
 
