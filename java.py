@@ -46,6 +46,17 @@ TEMPLATE   = """
             %s;
             %s
         }
+
+        public static Void p(Object obj) {
+            System.out.println(obj.toString());
+            return null;
+        }
+
+        public static Void p(String format, Object... params) {
+            System.out.println(String.format(format, params));
+            return null;
+        }
+
     }
     """
 OUTPUT_CODE_TEMPLATE = """
@@ -69,6 +80,9 @@ OUTPUT_CODE_TEMPLATE = """
         ϟ = Arrays.stream((long[]) ಠ_ಠ).mapToObj(Long::valueOf);
     } else if(ಠ_ಠ instanceof double[]) {
         ϟ = Arrays.stream((double[]) ಠ_ಠ).mapToObj(Double::valueOf);
+
+    } else if(ಠ_ಠ instanceof Map<?, ?>) {
+        ϟ = ((Map<?, ?>) ಠ_ಠ).entrySet().stream().map(e -> String.format("%%s: %%s", e.getKey(), e.getValue()));
 
     } else if(ಠ_ಠ instanceof Collection<?>) {
         ϟ = ((Collection<?>) ಠ_ಠ).stream();
