@@ -16,7 +16,7 @@ $ java.py 'Scanner s = new Scanner(System.in); s.nextLine()' <<< 'hello world!'
 
 The collection/array formatting allows you to quickly identify contained types:
 ```
-$ java.py "Object[] a = new Object[]{1, \"a\", null, 'a'}; a"
+$ java.py "new Object[]{1, \"a\", null, 'a'}"
  >> (Object[]) [1, "a", null, 'a']
 
  $ java.py 'Set<String> s = new HashSet<>(); s.add("hello"); s.add("world!"); s'

@@ -199,7 +199,7 @@ def generate_code(code):
     # Auto display formatting thingy stuff
     if not raw \
             and not last_instr.startswith('p(') \
-            and not last_instr.endswith('}'):
+            and not last_instr == '}':
         output = OUTPUT_CODE_TEMPLATE % (code[-1], ('\\n' if pretty else ' '))
         del code[-1]
 
