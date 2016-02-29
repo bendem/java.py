@@ -36,6 +36,7 @@ TEMPLATE   = """
     import java.util.concurrent.atomic.*;
     import java.util.concurrent.locks.*;
     import java.util.function.*;
+    import java.util.regex.*;
     import java.util.stream.*;
     import javax.crypto.*;
     import javax.crypto.spec.*;
@@ -138,10 +139,12 @@ def help():
     print()
     print('    -cp Adds a jar to the classpath.')
     print()
+    print('    -c Parameters to add to the java invocation')
+    print()
     sys.exit()
 
 def parse_args(args):
-    global verbose, pretty, setup, classpath, code_args, raw
+    global verbose, pretty, setup, classpath, code_args, raw, java_args
 
     if len(args) == 1:
         help()
@@ -164,6 +167,8 @@ def parse_args(args):
                 classpath.append(next(arg_it))
             elif x == '-h' or x == '--help':
                 help()
+            elif x == '-c':
+                java_args = next(arg_it)
             else:
                 code_args.append(x)
     except StopIteration:
@@ -255,7 +260,8 @@ def compile(javac):
     return True
 
 def run(java):
-    args = java_args + ' -cp %s' % ':'.join(classpath + [OUT])
+    cp = ':'.join(classpath + [OUT])
+    args = '%s -cp %s' % (java_args, cp)
     java = '%s %s %s' % (java, args, CLASS)
     java = java.replace('  ', ' ')
 
