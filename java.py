@@ -62,7 +62,7 @@ OUTPUT_CODE_TEMPLATE = """
     Object ಠ_ಠ = %s;
     String ᴥ = "null";
     if(ಠ_ಠ != null) {
-        if(ಠ_ಠ.getClass().getName().startsWith("java.lang.")) {
+        if(ಠ_ಠ.getClass().isArray() || ಠ_ಠ.getClass().getName().startsWith("java.lang.")) {
             ᴥ = ಠ_ಠ.getClass().getSimpleName();
         } else {
             ᴥ = ಠ_ಠ.getClass().getName();
