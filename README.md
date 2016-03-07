@@ -64,23 +64,6 @@ $ java.py -b 'String a = "a", b = a + "b"'
  >>       19: invokevirtual #7                  // Method java/lang/StringBuilder.toString:()Ljava/lang/String;
  >>       22: astore_2
  >>       23: return
- >>
- >>   public static void p(java.lang.Object);
- >>     Code:
- >>        0: getstatic     #8                  // Field java/lang/System.out:Ljava/io/PrintStream;
- >>        3: aload_0
- >>        4: invokevirtual #9                  // Method java/lang/Object.toString:()Ljava/lang/String;
- >>        7: invokevirtual #10                 // Method java/io/PrintStream.println:(Ljava/lang/String;)V
- >>       10: return
- >>
- >>   public static void p(java.lang.String, java.lang.Object...);
- >>     Code:
- >>        0: getstatic     #8                  // Field java/lang/System.out:Ljava/io/PrintStream;
- >>        3: aload_0
- >>        4: aload_1
- >>        5: invokestatic  #11                 // Method java/lang/String.format:(Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;
- >>        8: invokevirtual #10                 // Method java/io/PrintStream.println:(Ljava/lang/String;)V
- >>       11: return
  >> }
 ```
 

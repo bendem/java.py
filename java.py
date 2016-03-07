@@ -50,11 +50,11 @@ TEMPLATE   = """
             %s
         }
 
-        public static void p(Object obj) {
+        private static void p(Object obj) {
             System.out.println(obj.toString());
         }
 
-        public static void p(String format, Object... params) {
+        private static void p(String format, Object... params) {
             System.out.println(String.format(format, params));
         }
 
@@ -271,7 +271,7 @@ def run(java_home):
     cp = ':'.join(classpath + [OUT])
     args = '%s -cp %s' % (java_args, cp)
     if bytecode:
-        cmd = '%s/bin/javap -c %s %s' % (java_home, args, CLASS)
+        cmd = '%s/bin/javap -public -c %s %s' % (java_home, args, CLASS)
     else:
         cmd = '%s/bin/java %s %s' % (java_home, args, CLASS)
 
