@@ -21,6 +21,7 @@ SOURCE     = '%s.java' % CLASS
 COMPILED   = '%s.class' % CLASS
 TEMPLATE   = """
     import java.io.*;
+    import java.lang.reflect.*;
     import java.math.*;
     import java.nio.*;
     import java.nio.charset.*;
