@@ -143,7 +143,7 @@ def help():
     print()
     print('    -c Parameters to add to the java invocation')
     print()
-    print('    -b Prints the bytecode instead of executing the program')
+    print('    -b Prints the bytecode instead of executing the program (implies -r)')
     print()
     sys.exit()
 
@@ -175,6 +175,7 @@ def parse_args(args):
                 java_args = next(arg_it)
             elif x == '-b':
                 bytecode = True
+                raw = True
             else:
                 code_args.append(x)
     except StopIteration:
