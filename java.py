@@ -10,6 +10,7 @@ verbose   = False
 pretty    = False
 raw       = False
 setup     = ''
+bytecode  = False
 classpath = []
 code_args = []
 
@@ -142,10 +143,12 @@ def help():
     print()
     print('    -c Parameters to add to the java invocation')
     print()
+    print('    -b Prints the bytecode instead of executing the program')
+    print()
     sys.exit()
 
 def parse_args(args):
-    global verbose, pretty, setup, classpath, code_args, raw, java_args
+    global verbose, pretty, setup, classpath, code_args, raw, java_args, bytecode
 
     if len(args) == 1:
         help()
@@ -170,6 +173,8 @@ def parse_args(args):
                 help()
             elif x == '-c':
                 java_args = next(arg_it)
+            elif x == '-b':
+                bytecode = True
             else:
                 code_args.append(x)
     except StopIteration:
@@ -235,7 +240,8 @@ def find_java_home():
 
     return None
 
-def compile(javac):
+def compile(java_home):
+    javac = '%s/bin/javac' % java_home
     args = javac_args + ' -nowarn'
     if classpath:
         args += ' -cp %s' % ':'.join(classpath)
@@ -260,16 +266,20 @@ def compile(javac):
 
     return True
 
-def run(java):
+def run(java_home):
     cp = ':'.join(classpath + [OUT])
     args = '%s -cp %s' % (java_args, cp)
-    java = '%s %s %s' % (java, args, CLASS)
-    java = java.replace('  ', ' ')
+    if bytecode:
+        cmd = '%s/bin/javap -c %s %s' % (java_home, args, CLASS)
+    else:
+        cmd = '%s/bin/java %s %s' % (java_home, args, CLASS)
+
+    cmd = cmd.replace('  ', ' ')
 
     if verbose:
-        print('%% %s' % java)
+        print('%% %s' % cmd)
 
-    execution = subprocess.Popen(java, shell = True, stdout = subprocess.PIPE,
+    execution = subprocess.Popen(cmd, shell = True, stdout = subprocess.PIPE,
         stderr = subprocess.STDOUT)
 
     for line in execution.stdout.readlines():
@@ -296,6 +306,6 @@ if __name__ == '__main__':
 
     code = generate_code(' '.join(code_args))
     write_to_file(code, '%s/%s' % (OUT, SOURCE))
-    if compile('%s/bin/javac' % java_home):
-        run('%s/bin/java' % java_home)
+    if compile(java_home):
+        run(java_home)
         cleanup()
