@@ -45,6 +45,8 @@ TEMPLATE   = """
     %s
 
     public class %s {
+        private %s() {}
+
         public static void main(String[] args) throws Exception {
             %s;
             %s
@@ -210,7 +212,7 @@ def generate_code(code):
         output = OUTPUT_CODE_TEMPLATE % (code[-1], ('\\n' if pretty else ' '))
         del code[-1]
 
-    return TEMPLATE % (setup, CLASS, ';'.join(code), output)
+    return TEMPLATE % (setup, CLASS, CLASS, ';'.join(code), output)
 
 def write_to_file(code, file):
     with open(file, 'w') as f:
