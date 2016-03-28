@@ -98,6 +98,11 @@ OUTPUT_CODE_TEMPLATE = """
         ϟ = ((LongStream) ಠ_ಠ).boxed();
     } else if(ಠ_ಠ instanceof DoubleStream) {
         ϟ = ((DoubleStream) ಠ_ಠ).boxed();
+
+    } else if(ಠ_ಠ instanceof Iterable<?>) {
+        ϟ = StreamSupport.stream(((Iterable<?>) ಠ_ಠ).spliterator(), false);
+    } else if(ಠ_ಠ instanceof Spliterator<?>) {
+        ϟ = StreamSupport.stream((Spliterator<?>) ಠ_ಠ, false);
     }
 
     if(ϟ == null) {
