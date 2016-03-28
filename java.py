@@ -87,8 +87,6 @@ OUTPUT_CODE_TEMPLATE = """
         ϟ = ((Map<?, ?>) ಠ_ಠ).entrySet().stream()
             .map(ツ -> String.format("%%s: %%s", ツ.getKey(), ツ.getValue()));
 
-    } else if(ಠ_ಠ instanceof Collection<?>) {
-        ϟ = ((Collection<?>) ಠ_ಠ).stream();
     } else if(ಠ_ಠ instanceof Stream<?>) {
         ϟ = (Stream<?>) ಠ_ಠ;
 
