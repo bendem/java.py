@@ -313,15 +313,14 @@ def run(java_home, classpath):
         print('%% %s' % cmd)
 
     execution = subprocess.Popen(cmd, shell = True, stdout = subprocess.PIPE,
-        stderr = subprocess.STDOUT)
+        stderr = subprocess.STDOUT, universal_newlines = True, bufsize = 1)
 
     for line in execution.stdout.readlines():
-        l = line.decode()
         if raw:
-            l = l.rstrip()
+            line = line.rstrip()
         else:
-            l = l.strip()
-        print(' >> %s' % l)
+            line = line.strip()
+        print(' >> %s' % line)
 
     execution.wait()
 
