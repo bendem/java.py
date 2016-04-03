@@ -13,6 +13,7 @@ setup     = ''
 bytecode  = False
 classpath = []
 code_args = []
+mvn       = ''
 
 javac_args = ''
 java_args  = ''
@@ -132,27 +133,29 @@ def help():
     print()
     print(' Options are:')
     print()
-    print('    -p  Pretty output (in case of program result convertible to stream, each item will be printed on a new line).')
+    print('    -p   Pretty output (in case of program result convertible to stream, each item will be printed on a new line).')
     print()
-    print('    -s  Setup code to put before the class declaration (i.e. imports or class definitions).')
+    print('    -s   Setup code to put before the class declaration (i.e. imports or class definitions).')
     print()
-    print('    -h  Prints this help message.')
+    print('    -h   Prints this help message.')
     print()
-    print('    -v  Prints the commands used to compile and execute the script.')
+    print('    -v   Prints the commands used to compile and execute the script.')
     print()
-    print('    -r  Prevents adding some code to display the result of the last operation and replaces strip calls applied')
-    print('        to each line of the program output with rstrip.')
+    print('    -r   Prevents adding some code to display the result of the last operation and replaces strip calls applied')
+    print('         to each line of the program output with rstrip.')
     print()
-    print('    -cp Adds a jar to the classpath.')
+    print('    -cp  Adds a jar to the classpath.')
     print()
-    print('    -c Parameters to add to the java invocation')
+    print('    -c   Parameters to add to the java invocation')
     print()
-    print('    -b Prints the bytecode instead of executing the program (implies -r)')
+    print('    -b   Prints the bytecode instead of executing the program (implies -r)')
+    print()
+    print('    -mvn Adds maven dependencies of a project to the runtime classpath')
     print()
     sys.exit()
 
 def parse_args(args):
-    global verbose, pretty, setup, classpath, code_args, raw, java_args, bytecode
+    global verbose, pretty, setup, classpath, code_args, raw, java_args, bytecode, mvn
 
     if len(args) == 1:
         help()
@@ -180,6 +183,8 @@ def parse_args(args):
             elif x == '-b':
                 bytecode = True
                 raw = True
+            elif x == '-mvn':
+                mvn = next(arg_it)
             else:
                 code_args.append(x)
     except StopIteration:
@@ -245,7 +250,30 @@ def find_java_home():
 
     return None
 
-def compile(java_home):
+def find_maven_classpath(mvn):
+    if not mvn:
+        return []
+
+    args = ['mvn', 'dependency:build-classpath', '-f', mvn]
+
+    if verbose:
+        print('%% %s' % ' '.join(args))
+
+    proc = subprocess.Popen(args, stdout = subprocess.PIPE,
+            stderr = subprocess.STDOUT, universal_newlines = True,
+            bufsize = 1)
+
+    for line in proc.stdout:
+        if line.startswith('[ERROR]') or line.startswith('[FATAL]'):
+            break
+        if not line.startswith('['):
+            return line.strip().split(':')
+
+    print(' | mvn exited with status %s' % proc.wait())
+
+    return []
+
+def compile(java_home, classpath):
     javac = '%s/bin/javac' % java_home
     args = javac_args + ' -nowarn'
     if classpath:
@@ -271,7 +299,7 @@ def compile(java_home):
 
     return True
 
-def run(java_home):
+def run(java_home, classpath):
     cp = ':'.join(classpath + [OUT])
     args = '%s -cp %s' % (java_args, cp)
     if bytecode:
@@ -311,6 +339,9 @@ if __name__ == '__main__':
 
     code = generate_code(' '.join(code_args))
     write_to_file(code, '%s/%s' % (OUT, SOURCE))
-    if compile(java_home):
-        run(java_home)
+
+    classpath = classpath + find_maven_classpath(mvn)
+
+    if compile(java_home, classpath):
+        run(java_home, classpath)
         cleanup()
