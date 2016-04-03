@@ -269,7 +269,7 @@ def find_maven_classpath(mvn):
         if not line.startswith('['):
             return line.strip().split(':')
 
-    print(' | mvn exited with status %s' % proc.wait())
+    print('| mvn exited with status %s' % proc.wait())
 
     return []
 
@@ -289,7 +289,7 @@ def compile(java_home, classpath):
         stderr = subprocess.STDOUT)
 
     for line in p.stdout.readlines():
-        print(' | %s' % line.decode().strip())
+        print('| %s' % line.decode().strip())
 
     if p.wait() != 0:
         print('Compilation failed')
@@ -320,7 +320,7 @@ def run(java_home, classpath):
             line = line.rstrip()
         else:
             line = line.strip()
-        print(' >> %s' % line)
+        print('>> %s' % line)
 
     execution.wait()
 
@@ -333,7 +333,7 @@ if __name__ == '__main__':
     parse_args(sys.argv)
     java_home = find_java_home()
     if not java_home:
-        print(' Java home not found, aborting...')
+        print('| Java home not found, aborting...')
         os.exit(1)
 
     code = generate_code(' '.join(code_args))
