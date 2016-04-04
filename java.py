@@ -189,14 +189,20 @@ def log(command):
         return
 
     if verbosity == 1:
+        if not isinstance(command, list):
+            command = command.split(' ')
+
         parts = []
-        for part in command.split(' '):
+        for part in command:
             if len(part) > 50:
                 part = part[:20] + '[...]' + part[-20:]
             parts.append(part)
         command = ' '.join(parts)
 
-    print(command)
+    if isinstance(command, list):
+        command = ' '.join(command)
+
+    print('%% %s' % command)
 
 def generate_code(code):
     # Splitting on ; is really horrible and breaks in many cases but
@@ -255,20 +261,21 @@ def find_java_home():
 
     return None
 
+def exec(cmd, shell = True):
+    log(cmd)
+    return subprocess.Popen(cmd, stdout = subprocess.PIPE,
+            stderr = subprocess.STDOUT, universal_newlines = True,
+            shell = shell, bufsize = 1)
+
 def find_maven_classpath(mvn):
     if not mvn:
         return []
 
-    args = ['mvn', 'dependency:build-classpath', '-f', mvn]
-
-    log('%% %s' % ' '.join(args))
-
-    proc = subprocess.Popen(args, stdout = subprocess.PIPE,
-            stderr = subprocess.STDOUT, universal_newlines = True,
-            bufsize = 1)
+    proc = exec(['mvn', 'dependency:build-classpath', '-f', mvn], False)
 
     for line in proc.stdout:
         if line.startswith('[ERROR]') or line.startswith('[FATAL]'):
+            print(line)
             break
         if not line.startswith('['):
             return line.strip().split(':')
@@ -286,13 +293,10 @@ def compile(java_home, classpath):
     javac = '%s %s -d %s %s/%s' % (javac, args, OUT, OUT, SOURCE)
     javac = javac.replace('  ', ' ')
 
-    log('%% %s' % javac)
+    p = exec(javac)
 
-    p = subprocess.Popen(javac, shell = True, stdout = subprocess.PIPE,
-        stderr = subprocess.STDOUT)
-
-    for line in p.stdout.readlines():
-        print('| %s' % line.decode().strip())
+    for line in p.stdout:
+        print('| %s' % line.rstrip())
 
     if p.wait() != 0:
         print('Compilation failed')
@@ -312,12 +316,9 @@ def run(java_home, classpath):
 
     cmd = cmd.replace('  ', ' ')
 
-    log('%% %s' % cmd)
+    execution = exec(cmd)
 
-    execution = subprocess.Popen(cmd, shell = True, stdout = subprocess.PIPE,
-        stderr = subprocess.STDOUT, universal_newlines = True, bufsize = 1)
-
-    for line in execution.stdout.readlines():
+    for line in execution.stdout:
         if raw:
             line = line.rstrip()
         else:
