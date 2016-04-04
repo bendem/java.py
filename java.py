@@ -6,7 +6,7 @@ import re
 import subprocess
 import sys
 
-verbose   = False
+verbosity = 0
 pretty    = False
 raw       = False
 setup     = ''
@@ -155,7 +155,7 @@ def help():
     sys.exit()
 
 def parse_args(args):
-    global verbose, pretty, setup, classpath, code_args, raw, java_args, bytecode, mvn
+    global verbosity, pretty, setup, classpath, code_args, raw, java_args, bytecode, mvn
 
     if len(args) == 1:
         help()
@@ -171,7 +171,7 @@ def parse_args(args):
             elif x == '-p':
                 pretty = True
             elif x == '-v':
-                verbose = True
+                verbosity += 1
             elif x == '-r':
                 raw = True
             elif x == '-cp':
@@ -192,6 +192,20 @@ def parse_args(args):
 
     if not code_args:
         help()
+
+def log(command):
+    if verbosity == 0:
+        return
+
+    if verbosity == 1:
+        parts = []
+        for part in command.split(' '):
+            if len(part) > 50:
+                part = part[:20] + '[...]' + part[-20:]
+            parts.append(part)
+        command = ' '.join(parts)
+
+    print(command)
 
 def generate_code(code):
     # Splitting on ; is really horrible and breaks in many cases but
@@ -256,8 +270,7 @@ def find_maven_classpath(mvn):
 
     args = ['mvn', 'dependency:build-classpath', '-f', mvn]
 
-    if verbose:
-        print('%% %s' % ' '.join(args))
+    log('%% %s' % ' '.join(args))
 
     proc = subprocess.Popen(args, stdout = subprocess.PIPE,
             stderr = subprocess.STDOUT, universal_newlines = True,
@@ -282,8 +295,7 @@ def compile(java_home, classpath):
     javac = '%s %s -d %s %s/%s' % (javac, args, OUT, OUT, SOURCE)
     javac = javac.replace('  ', ' ')
 
-    if verbose:
-        print('%% %s' % javac)
+    log('%% %s' % javac)
 
     p = subprocess.Popen(javac, shell = True, stdout = subprocess.PIPE,
         stderr = subprocess.STDOUT)
@@ -309,8 +321,7 @@ def run(java_home, classpath):
 
     cmd = cmd.replace('  ', ' ')
 
-    if verbose:
-        print('%% %s' % cmd)
+    log('%% %s' % cmd)
 
     execution = subprocess.Popen(cmd, shell = True, stdout = subprocess.PIPE,
         stderr = subprocess.STDOUT, universal_newlines = True, bufsize = 1)
