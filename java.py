@@ -122,7 +122,9 @@ OUTPUT_CODE_TEMPLATE = """
                     }
                     return "\\"" + ツ + '"';
                 })
-                .collect(Collectors.joining(",%s", "[", "]"))
+                .collect((Collector<CharSequence, ?, String>) (%s
+                    ? Collectors.joining(",\\n", "[\\n", "\\n]")
+                    : Collectors.joining(", ", "[", "]")))
         );
     }
 """
@@ -227,7 +229,7 @@ def generate_code(code):
     if not raw \
             and not last_instr.startswith('p(') \
             and not last_instr == '}':
-        output = OUTPUT_CODE_TEMPLATE % (code[-1], ('\\n' if pretty else ' '))
+        output = OUTPUT_CODE_TEMPLATE % (code[-1], ('true' if pretty else 'false'))
         del code[-1]
 
     return TEMPLATE % (setup, CLASS, CLASS, ';'.join(code), output)
