@@ -320,6 +320,9 @@ def run(java_home, classpath):
 
     execution = exec(cmd)
 
+    if bytecode:
+        execution.stdout.readline()
+
     for line in execution.stdout:
         if raw:
             line = line.rstrip()
