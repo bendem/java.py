@@ -183,7 +183,7 @@ def parse_args(args):
     except StopIteration:
         pass
 
-    if not code_args:
+    if not code_args and not raw:
         help()
 
 def log(command):
