@@ -312,7 +312,9 @@ def run(java_home, classpath):
     cp = ':'.join(classpath + [OUT])
     args = '%s -cp %s' % (java_args, cp)
     if bytecode:
-        cmd = '%s/bin/javap -public -c %s %s' % (java_home, args, CLASS)
+        if verbosity > 0:
+            args += ' -v'
+        cmd = '%s/bin/javap -constants -package -c %s %s' % (java_home, args, CLASS)
     else:
         cmd = '%s/bin/java %s %s' % (java_home, args, CLASS)
 
@@ -321,7 +323,8 @@ def run(java_home, classpath):
     execution = exec(cmd)
 
     if bytecode:
-        execution.stdout.readline()
+        # skip preamble
+        [execution.stdout.readline() for i in range(4 if verbosity > 0 else 1)]
 
     for line in execution.stdout:
         if raw:
