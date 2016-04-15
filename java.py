@@ -263,6 +263,9 @@ def find_java_home():
 
     return None
 
+def read_stdin():
+    return sys.stdin.readlines()
+
 def exec(cmd, shell = True):
     log(cmd)
     return subprocess.Popen(cmd, stdout = subprocess.PIPE,
@@ -342,6 +345,10 @@ def cleanup(compiled = True):
 
 if __name__ == '__main__':
     parse_args(sys.argv)
+
+    if len(code_args) == 1 and code_args[0] == '-':
+        code_args = read_stdin()
+
     java_home = find_java_home()
     if not java_home:
         print('| Java home not found, aborting...')
