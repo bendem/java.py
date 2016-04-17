@@ -352,7 +352,7 @@ if __name__ == '__main__':
     java_home = find_java_home()
     if not java_home:
         print('| Java home not found, aborting...')
-        os.exit(1)
+        sys.exit(1)
 
     code = generate_code(' '.join(code_args))
     write_to_file(code, '%s/%s' % (OUT, SOURCE))
