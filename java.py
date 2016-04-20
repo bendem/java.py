@@ -43,7 +43,7 @@ TEMPLATE   = """
     import java.util.stream.*;
     import javax.crypto.*;
     import javax.crypto.spec.*;
-    %s
+    %s;
 
     public class %s {
         private %s() {}
@@ -67,7 +67,9 @@ OUTPUT_CODE_TEMPLATE = """
     Object ಠ_ಠ = %s;
     String ᴥ = "null";
     if(ಠ_ಠ != null) {
-        ᴥ = ಠ_ಠ.getClass().getCanonicalName();
+        if((ᴥ = ಠ_ಠ.getClass().getCanonicalName()) == null) {
+            ᴥ = ಠ_ಠ.getClass().getName();
+        }
         if(ᴥ.startsWith("java.lang.")) {
             ᴥ = ᴥ.substring("java.lang.".length());
         }
