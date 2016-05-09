@@ -54,7 +54,7 @@ TEMPLATE   = """
         }
 
         private static void p(Object obj) {
-            System.out.println(obj.toString());
+            System.out.println(obj);
         }
 
         private static void p(String format, Object... params) {
