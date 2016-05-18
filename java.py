@@ -6,6 +6,7 @@ import random
 import re
 import subprocess
 import sys
+from time import perf_counter
 
 config = {
     'verbosity':  0,
@@ -17,6 +18,7 @@ config = {
     'bytecode':   False,
     'mvn':        [],
     'javac_args': ['-nowarn'],
+    'timings':    False,
 }
 
 OUT        = '/tmp/java.py'
@@ -147,6 +149,7 @@ def help():
     print('    -p   Pretty output(in case of program result convertible to stream, each item will be printed on a new line).')
     print('    -r   Prevents adding some code to display the result of the last operation and replaces strip calls applied to each line of the program output with rstrip.')
     print('    -s   Setup code to put before the class declaration (i.e. imports or class definitions).')
+    print('    -t   Prints timing information about compilation and execution')
     print('    -v   Prints the commands used to compile and execute the script (provide this argument twice if you want non-simplified commands).')
     print()
     sys.exit()
@@ -183,6 +186,8 @@ def parse_args(args):
             config['raw'] = True
         elif x == '-mvn':
             config['mvn'].append(next(arg_it))
+        elif x == '-t':
+            config['timings'] = True
         else:
             code.append(x)
 
@@ -313,7 +318,7 @@ def compile(file, folder, java_home, javac_args, classpath):
     args.append(folder)
     args.append(file)
 
-    # FIXME That doesn't work
+    start = perf_counter()
     p = exec([exe] + args, False)
 
     for line in p.stdout:
@@ -324,6 +329,9 @@ def compile(file, folder, java_home, javac_args, classpath):
         cleanup(False)
         sys.exit(-1)
         return False
+
+    if config['timings']:
+        print('Program compiled in %f seconds' % (perf_counter() - start))
 
     return True
 
@@ -340,6 +348,7 @@ def run(clazz, bytecode, raw, java_home, java_args, classpath):
 
     args.append(clazz)
 
+    start = perf_counter()
     execution = exec([exe] + args, False)
 
     if bytecode:
@@ -355,6 +364,9 @@ def run(clazz, bytecode, raw, java_home, java_args, classpath):
         print('>> %s' % line)
 
     execution.wait()
+
+    if config['timings']:
+        print('Program executed in %f seconds' % (perf_counter() - start))
 
 def cleanup(compiled=True):
     os.remove('%s/%s' % (OUT, SOURCE))
