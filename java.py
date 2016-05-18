@@ -2,23 +2,25 @@
 # -*- coding: utf-8 -*-
 
 import os
+import random
 import re
 import subprocess
 import sys
 
-verbosity = 0
-pretty    = False
-raw       = False
-setup     = ''
-bytecode  = False
-classpath = []
-code_args = []
-mvn       = ''
+config = {
+    'verbosity':  0,
+    'pretty':     False,
+    'setup':      [],
+    'classpath':  [],
+    'raw':        False,
+    'java_args':  [],
+    'bytecode':   False,
+    'mvn':        [],
+    'javac_args': ['-nowarn'],
+}
 
-javac_args = ''
-java_args  = ''
-OUT        = '/tmp'
-CLASS      = 'Paul'
+OUT        = '/tmp/java.py'
+CLASS      = 'Paul%s' % int(random.random() * 100)
 SOURCE     = '%s.java' % CLASS
 COMPILED   = '%s.class' % CLASS
 TEMPLATE   = """
@@ -75,7 +77,7 @@ OUTPUT_CODE_TEMPLATE = """
         }
     }
 
-    Stream<?> ϟ = null;
+    Stream<? extends Object> ϟ = null;
     if(ಠ_ಠ instanceof Object[]) {
         ϟ = Arrays.stream((Object[]) ಠ_ಠ);
 
@@ -150,51 +152,58 @@ def help():
     sys.exit()
 
 def parse_args(args):
-    global verbosity, pretty, setup, classpath, code_args, raw, java_args, bytecode, mvn
+    code = []
 
     if len(args) == 1:
         help()
 
     arg_it = iter(args)
-    next(arg_it)
-    try:
-        while True:
-            x = next(arg_it)
-            if x == '-s':
-                setup = next(arg_it)
-                setup = setup.strip(';') + ';'
-            elif x == '-p':
-                pretty = True
-            elif x == '-v':
-                verbosity += 1
-            elif x == '-r':
-                raw = True
-            elif x == '-cp':
-                classpath.append(next(arg_it))
-            elif x == '-h' or x == '--help':
-                help()
-            elif x == '-c':
-                java_args = next(arg_it)
-            elif x == '-b':
-                bytecode = True
-                raw = True
-            elif x == '-mvn':
-                mvn = next(arg_it)
-            else:
-                code_args.append(x)
-    except StopIteration:
-        pass
+    next(arg_it)  # skip command
 
-    if not code_args and not raw:
+    for x in arg_it:
+        if x == '-s':
+            setup = next(arg_it)
+            config['setup'] += setup.strip(';').split(';')
+        elif x == '-p':
+            config['pretty'] = True
+        elif x == '-v':
+            config['verbosity'] += 1
+        elif x == '-vv':
+            config['verbosity'] += 2
+        elif x == '-r':
+            config['raw'] = True
+        elif x == '-cp':
+            config['classpath'].append(next(arg_it))
+        elif x == '-h' or x == '--help':
+            help()
+        elif x == '-c':
+            config['java_args'].append(next(arg_it))
+        elif x == '-b':
+            config['bytecode'] = True
+            config['raw'] = True
+        elif x == '-mvn':
+            config['mvn'].append(next(arg_it))
+        else:
+            code.append(x)
+
+    if not code and not config['raw']:
         help()
 
+    return code, config
+
 def log(command):
-    if verbosity == 0:
+    if not config['verbosity']:
         return
 
-    if verbosity == 1:
-        if not isinstance(command, list):
+    if config['verbosity'] == 3:
+        print(command)
+        return
+
+    if config['verbosity'] == 1:
+        try:
             command = command.split(' ')
+        except AttributeError:
+            pass
 
         parts = []
         for part in command:
@@ -203,42 +212,47 @@ def log(command):
             parts.append(part)
         command = ' '.join(parts)
 
-    if isinstance(command, list):
+    if not isinstance(command, str):
         command = ' '.join(command)
 
     print('%% %s' % command)
 
-def generate_code(code):
+def generate_code(code, clazz, template, out_template=''):
     # Splitting on ; is really horrible and breaks in many cases but
     # it's a fair trade compared to the complexity of writing a parser
     code = code.strip(';').split(';')
     last_instr = code[-1].strip()
     output = ''
 
-    if not raw and '=' in last_instr:
-        to_print = last_instr.split('=')[0].strip()
+    if not config['raw']:
+        if '=' in last_instr:
+            to_print = last_instr.split('=')[0].strip()
 
-        # Extracts var name from declarations like "int a"
-        # or "Map<String, String> a"
-        if ' ' in to_print:
-            r = re.compile(r'^.+\s+([^ ]+)$').match(to_print).group(1)
-            to_print = ' '.join(r)
+            # Extracts var name from declarations like "int a"
+            # or "Map<String, String> a"
+            if ' ' in to_print:
+                r = re.compile(r'^.+\s+([^ ]+)$').match(to_print).group(1)
+                to_print = ' '.join(r)
 
-        code.append(to_print)
-        last_instr = to_print
+            code.append(to_print)
+            last_instr = to_print
 
-    # Auto display formatting thingy stuff
-    if not raw \
-            and not last_instr.startswith('p(') \
-            and not last_instr == '}':
-        output = OUTPUT_CODE_TEMPLATE % (code[-1], ('true' if pretty else 'false'))
-        del code[-1]
+        # Auto display formatting thingy stuff
+        if not last_instr.startswith('p(') and last_instr != '}':
+            output = out_template % (code[-1],
+                    ('true' if config['pretty'] else 'false'))
+            del code[-1]
 
-    return TEMPLATE % (setup, CLASS, CLASS, ';'.join(code), output)
+    return template % (';'.join(config['setup']), clazz, clazz,
+            ';'.join(code), output)
 
-def write_to_file(code, file):
+def write_to_file(file, content):
+    dirname = os.path.dirname(file)
+    if not os.path.exists(dirname):
+        os.mkdir(dirname)
+
     with open(file, 'w') as f:
-        f.write(code)
+        f.write(content)
 
 def which(name):
     for path in os.getenv('PATH').split(os.pathsep):
@@ -246,12 +260,9 @@ def which(name):
         if os.path.isfile(file) and os.access(file, os.X_OK):
             return file
 
-    return None
-
 def dirname(name, count):
     for i in range(count):
         name = os.path.dirname(name)
-
     return name
 
 def find_java_home():
@@ -263,44 +274,47 @@ def find_java_home():
     if java_home:
         return dirname(java_home, 2)
 
-    return None
-
 def read_stdin():
     return sys.stdin.readlines()
 
-def exec(cmd, shell = True):
+def exec(cmd, shell=True):
     log(cmd)
-    return subprocess.Popen(cmd, stdout = subprocess.PIPE,
-            stderr = subprocess.STDOUT, universal_newlines = True,
-            shell = shell, bufsize = 1)
+    return subprocess.Popen(cmd, stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT, universal_newlines=True,
+            shell=shell, bufsize=1)
 
 def find_maven_classpath(mvn):
     if not mvn:
         return []
 
-    proc = exec(['mvn', 'dependency:build-classpath', '-f', mvn], False)
+    cp = []
 
-    for line in proc.stdout:
-        if line.startswith('[ERROR]') or line.startswith('[FATAL]'):
-            print(line)
-            break
-        if not line.startswith('['):
-            return line.strip().split(':')
+    for folder in mvn:
+        proc = exec(['mvn', 'dependency:build-classpath', '-f', folder], False)
 
-    print('| mvn exited with status %s' % proc.wait())
+        for line in proc.stdout:
+            if line.startswith('[ERROR]') or line.startswith('[FATAL]'):
+                print(line)
+                break
+            if not line.startswith('['):
+                cp += line.strip().split(':')
 
-    return []
+    return cp
 
-def compile(java_home, classpath):
-    javac = '%s/bin/javac' % java_home
-    args = javac_args + ' -nowarn'
+def compile(file, folder, java_home, javac_args, classpath):
+    exe = '%s/bin/javac' % java_home
+    args = list(javac_args)
+
     if classpath:
-        args += ' -cp %s' % ':'.join(classpath)
+        args.append('-cp')
+        args.append(':'.join(classpath))
 
-    javac = '%s %s -d %s %s/%s' % (javac, args, OUT, OUT, SOURCE)
-    javac = javac.replace('  ', ' ')
+    args.append('-d')
+    args.append(folder)
+    args.append(file)
 
-    p = exec(javac)
+    # FIXME That doesn't work
+    p = exec([exe] + args, False)
 
     for line in p.stdout:
         print('| %s' % line.rstrip())
@@ -313,23 +327,25 @@ def compile(java_home, classpath):
 
     return True
 
-def run(java_home, classpath):
+def run(clazz, bytecode, raw, java_home, java_args, classpath):
+    exe = '%s/bin/java' % java_home
     cp = ':'.join(classpath + [OUT])
-    args = '%s -cp %s' % (java_args, cp)
+    args = java_args + ['-cp', cp]
+
     if bytecode:
-        if verbosity > 0:
-            args += ' -v'
-        cmd = '%s/bin/javap -constants -package -c %s %s' % (java_home, args, CLASS)
-    else:
-        cmd = '%s/bin/java %s %s' % (java_home, args, CLASS)
+        exe = '%s/bin/javap' % java_home
+        args += ['-constants', '-package', '-c']
+        if config['verbosity'] > 0:
+            args.append('-v')
 
-    cmd = cmd.replace('  ', ' ')
+    args.append(clazz)
 
-    execution = exec(cmd)
+    execution = exec([exe] + args, False)
 
     if bytecode:
         # skip preamble
-        [execution.stdout.readline() for i in range(4 if verbosity > 0 else 1)]
+        for i in range(4 if config['verbosity'] > 0 else 1):
+            execution.stdout.readline()
 
     for line in execution.stdout:
         if raw:
@@ -340,13 +356,13 @@ def run(java_home, classpath):
 
     execution.wait()
 
-def cleanup(compiled = True):
+def cleanup(compiled=True):
     os.remove('%s/%s' % (OUT, SOURCE))
     if compiled:
         os.remove('%s/%s' % (OUT, COMPILED))
 
 if __name__ == '__main__':
-    parse_args(sys.argv)
+    code_args, config = parse_args(sys.argv)
 
     if len(code_args) == 1 and code_args[0] == '-':
         code_args = read_stdin()
@@ -356,11 +372,22 @@ if __name__ == '__main__':
         print('| Java home not found, aborting...')
         sys.exit(1)
 
-    code = generate_code(' '.join(code_args))
-    write_to_file(code, '%s/%s' % (OUT, SOURCE))
+    code = generate_code(' '.join(code_args), CLASS,
+            TEMPLATE, OUTPUT_CODE_TEMPLATE)
 
-    classpath = classpath + find_maven_classpath(mvn)
+    if config['verbosity'] > 2:
+        print(code)
 
-    if compile(java_home, classpath):
-        run(java_home, classpath)
-        cleanup()
+    source = '%s/%s' % (OUT, SOURCE)
+    write_to_file(source, code)
+
+    config['classpath'] += find_maven_classpath(config['mvn'])
+
+    compiled = compile(source, OUT, java_home, config['javac_args'],
+            config['classpath'])
+
+    if compiled:
+        run(CLASS, config['bytecode'], config['raw'], java_home,
+                config['java_args'], config['classpath'])
+
+    cleanup(source)
