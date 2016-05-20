@@ -8,6 +8,14 @@ import subprocess
 import sys
 from time import perf_counter
 
+pygments_available = True
+try:
+    import pygments
+    from pygments.lexers import JavaLexer
+    from pygments.formatters import TerminalFormatter
+except ImportError:
+    pygments_available = False
+
 config = {
     'verbosity':  0,
     'pretty':     False,
@@ -19,6 +27,7 @@ config = {
     'mvn':        [],
     'javac_args': ['-nowarn'],
     'timings':    False,
+    'debug':      False,
 }
 
 OUT        = '/tmp/java.py'
@@ -26,113 +35,113 @@ CLASS      = 'Paul%s' % int(random.random() * 100)
 SOURCE     = '%s.java' % CLASS
 COMPILED   = '%s.class' % CLASS
 TEMPLATE   = """
-    import java.io.*;
-    import java.lang.reflect.*;
-    import java.math.*;
-    import java.nio.*;
-    import java.nio.charset.*;
-    import java.nio.file.*;
-    import java.security.*;
-    import java.time.*;
-    import java.time.chrono.*;
-    import java.time.format.*;
-    import java.time.temporal.*;
-    import java.time.zone.*;
-    import java.util.*;
-    import java.util.concurrent.*;
-    import java.util.concurrent.atomic.*;
-    import java.util.concurrent.locks.*;
-    import java.util.function.*;
-    import java.util.regex.*;
-    import java.util.stream.*;
-    import javax.crypto.*;
-    import javax.crypto.spec.*;
-    %s;
+import java.io.*;
+import java.lang.reflect.*;
+import java.math.*;
+import java.nio.*;
+import java.nio.charset.*;
+import java.nio.file.*;
+import java.security.*;
+import java.time.*;
+import java.time.chrono.*;
+import java.time.format.*;
+import java.time.temporal.*;
+import java.time.zone.*;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.*;
+import java.util.concurrent.locks.*;
+import java.util.function.*;
+import java.util.regex.*;
+import java.util.stream.*;
+import javax.crypto.*;
+import javax.crypto.spec.*;
+%s;
 
-    public class %s {
-        private %s() {}
+public class %s {
+    private %s() {}
 
-        public static void main(String[] args) throws Exception {
-            %s;
-            %s
-        }
-
-        private static void p(Object obj) {
-            System.out.println(obj);
-        }
-
-        private static void p(String format, Object... params) {
-            System.out.println(String.format(format, params));
-        }
-
+    public static void main(String[] args) throws Exception {
+        %s;
+        %s
     }
-    """
+
+    private static void p(Object obj) {
+        System.out.println(obj);
+    }
+
+    private static void p(String format, Object... params) {
+        System.out.println(String.format(format, params));
+    }
+
+}
+"""
 OUTPUT_CODE_TEMPLATE = """
-    Object ಠ_ಠ = %s;
-    String ᴥ = "null";
-    if(ಠ_ಠ != null) {
-        if((ᴥ = ಠ_ಠ.getClass().getCanonicalName()) == null) {
-            ᴥ = ಠ_ಠ.getClass().getName();
+        Object ಠ_ಠ = %s;
+        String ᴥ = "null";
+        if(ಠ_ಠ != null) {
+            if((ᴥ = ಠ_ಠ.getClass().getCanonicalName()) == null) {
+                ᴥ = ಠ_ಠ.getClass().getName();
+            }
+            if(ᴥ.startsWith("java.lang.")) {
+                ᴥ = ᴥ.substring("java.lang.".length());
+            }
         }
-        if(ᴥ.startsWith("java.lang.")) {
-            ᴥ = ᴥ.substring("java.lang.".length());
+
+        Stream<? extends Object> ϟ = null;
+        if(ಠ_ಠ instanceof Object[]) {
+            ϟ = Arrays.stream((Object[]) ಠ_ಠ);
+
+        } else if(ಠ_ಠ instanceof int[]) {
+            ϟ = Arrays.stream((int[]) ಠ_ಠ).mapToObj(Integer::valueOf);
+        } else if(ಠ_ಠ instanceof long[]) {
+            ϟ = Arrays.stream((long[]) ಠ_ಠ).mapToObj(Long::valueOf);
+        } else if(ಠ_ಠ instanceof double[]) {
+            ϟ = Arrays.stream((double[]) ಠ_ಠ).mapToObj(Double::valueOf);
+
+        } else if(ಠ_ಠ instanceof Map<?, ?>) {
+            ϟ = ((Map<?, ?>) ಠ_ಠ).entrySet().stream()
+                .map(ツ -> String.format("%%s: %%s", ツ.getKey(), ツ.getValue()));
+
+        } else if(ಠ_ಠ instanceof Stream<?>) {
+            ϟ = (Stream<?>) ಠ_ಠ;
+
+        } else if(ಠ_ಠ instanceof IntStream) {
+            ϟ = ((IntStream) ಠ_ಠ).boxed();
+        } else if(ಠ_ಠ instanceof LongStream) {
+            ϟ = ((LongStream) ಠ_ಠ).boxed();
+        } else if(ಠ_ಠ instanceof DoubleStream) {
+            ϟ = ((DoubleStream) ಠ_ಠ).boxed();
+
+        } else if(ಠ_ಠ instanceof Iterable<?>) {
+            ϟ = StreamSupport.stream(((Iterable<?>) ಠ_ಠ).spliterator(), false);
+        } else if(ಠ_ಠ instanceof Spliterator<?>) {
+            ϟ = StreamSupport.stream((Spliterator<?>) ಠ_ಠ, false);
         }
-    }
 
-    Stream<? extends Object> ϟ = null;
-    if(ಠ_ಠ instanceof Object[]) {
-        ϟ = Arrays.stream((Object[]) ಠ_ಠ);
-
-    } else if(ಠ_ಠ instanceof int[]) {
-        ϟ = Arrays.stream((int[]) ಠ_ಠ).mapToObj(Integer::valueOf);
-    } else if(ಠ_ಠ instanceof long[]) {
-        ϟ = Arrays.stream((long[]) ಠ_ಠ).mapToObj(Long::valueOf);
-    } else if(ಠ_ಠ instanceof double[]) {
-        ϟ = Arrays.stream((double[]) ಠ_ಠ).mapToObj(Double::valueOf);
-
-    } else if(ಠ_ಠ instanceof Map<?, ?>) {
-        ϟ = ((Map<?, ?>) ಠ_ಠ).entrySet().stream()
-            .map(ツ -> String.format("%%s: %%s", ツ.getKey(), ツ.getValue()));
-
-    } else if(ಠ_ಠ instanceof Stream<?>) {
-        ϟ = (Stream<?>) ಠ_ಠ;
-
-    } else if(ಠ_ಠ instanceof IntStream) {
-        ϟ = ((IntStream) ಠ_ಠ).boxed();
-    } else if(ಠ_ಠ instanceof LongStream) {
-        ϟ = ((LongStream) ಠ_ಠ).boxed();
-    } else if(ಠ_ಠ instanceof DoubleStream) {
-        ϟ = ((DoubleStream) ಠ_ಠ).boxed();
-
-    } else if(ಠ_ಠ instanceof Iterable<?>) {
-        ϟ = StreamSupport.stream(((Iterable<?>) ಠ_ಠ).spliterator(), false);
-    } else if(ಠ_ಠ instanceof Spliterator<?>) {
-        ϟ = StreamSupport.stream((Spliterator<?>) ಠ_ಠ, false);
-    }
-
-    if(ϟ == null) {
-        System.out.println("(" + ᴥ + ") " + ಠ_ಠ);
-    } else {
-        System.out.printf("(" + ᴥ + ") ");
-        System.out.println(
-            ϟ
-                .map(ツ -> {
-                    if(ツ == null) {
-                        return "null";
-                    }
-                    if(ツ instanceof Character) {
-                        return "'" + ツ + "'";
-                    }
-                    if(ツ instanceof Number) {
-                        return ツ.toString();
-                    }
-                    return "\\"" + ツ + '"';
-                })
-                .collect((Collector<CharSequence, ?, String>) (%s
-                    ? Collectors.joining(",\\n", "[\\n", "\\n]")
-                    : Collectors.joining(", ", "[", "]")))
-        );
-    }
+        if(ϟ == null) {
+            System.out.println("(" + ᴥ + ") " + ಠ_ಠ);
+        } else {
+            System.out.printf("(" + ᴥ + ") ");
+            System.out.println(
+                ϟ
+                    .map(ツ -> {
+                        if(ツ == null) {
+                            return "null";
+                        }
+                        if(ツ instanceof Character) {
+                            return "'" + ツ + "'";
+                        }
+                        if(ツ instanceof Number) {
+                            return ツ.toString();
+                        }
+                        return "\\"" + ツ + '"';
+                    })
+                    .collect((Collector<CharSequence, ?, String>) (%s
+                        ? Collectors.joining(",\\n", "[\\n", "\\n]")
+                        : Collectors.joining(", ", "[", "]")))
+            );
+        }
 """
 
 def help():
@@ -143,6 +152,7 @@ def help():
     print()
     print('    -b   Prints the bytecode instead of executing the program (implies -r)')
     print('    -c   Parameters to add to the java invocation')
+    print('    -d   Prints the code compiled and executed (requires pygments installed)')
     print('    -cp  Adds a jar to the classpath.')
     print('    -h   Prints this help message.')
     print('    -mvn Adds maven dependencies of a project to the runtime classpath')
@@ -188,6 +198,8 @@ def parse_args(args):
             config['mvn'].append(next(arg_it))
         elif x == '-t':
             config['timings'] = True
+        elif x == '-d':
+            config['debug'] = True
         else:
             code.append(x)
 
@@ -250,6 +262,13 @@ def generate_code(code, clazz, template, out_template=''):
 
     return template % (';'.join(config['setup']), clazz, clazz,
             ';'.join(code), output)
+
+def display_code(code):
+    if not pygments_available:
+        print('Warning: pygments not found')
+        return
+
+    print(pygments.highlight(code, JavaLexer(), TerminalFormatter()))
 
 def write_to_file(file, content):
     dirname = os.path.dirname(file)
@@ -391,6 +410,10 @@ if __name__ == '__main__':
         print(code)
 
     source = '%s/%s' % (OUT, SOURCE)
+
+    if config['debug']:
+        display_code(code)
+
     write_to_file(source, code)
 
     config['classpath'] += find_maven_classpath(config['mvn'])
