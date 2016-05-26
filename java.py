@@ -145,23 +145,23 @@ OUTPUT_CODE_TEMPLATE = """
 """
 
 def help():
-    print()
     print('Usage is ./java.py [options] <code>')
     print()
-    print('Options are:')
-    print()
-    print('    -b   Prints the bytecode instead of executing the program (implies -r)')
-    print('    -c   Parameters to add to the java invocation')
-    print('    -d   Prints the code compiled and executed (requires pygments installed)')
-    print('    -cp  Adds a jar to the classpath.')
-    print('    -h   Prints this help message.')
-    print('    -mvn Adds maven dependencies of a project to the runtime classpath')
-    print('    -p   Pretty output(in case of program result convertible to stream, each item will be printed on a new line).')
-    print('    -r   Prevents adding some code to display the result of the last operation and replaces strip calls applied to each line of the program output with rstrip.')
-    print('    -s   Setup code to put before the class declaration (i.e. imports or class definitions).')
-    print('    -t   Prints timing information about compilation and execution')
-    print('    -v   Prints the commands used to compile and execute the script (provide this argument twice if you want non-simplified commands).')
-    print()
+    print('Options')
+    print(' -b,   -bytecode   Prints the bytecode instead of executing the program (implies -r)')
+    print(' -c,   -arg        Parameters to add to the java invocation')
+    print(' -d,   -debug      Prints the code compiled and executed (requires pygments installed)')
+    print(' -cp,  -classpath  Adds a jar to the classpath.')
+    print(' -h,   -help       Prints this help message.')
+    print(' -mvn, -maven      Adds maven dependencies of a project to the runtime classpath')
+    print(' -p,   -pretty     Pretty output(in case of program result convertible to stream, each item will be')
+    print('                   printed on a new line).')
+    print(' -r,   -raw        Prevents adding some code to display the result of the last operation')
+    print('                   and replaces strip calls applied to each line of the program output with rstrip.')
+    print(' -s,   -setup      Setup code to put before the class declaration (i.e. imports or class definitions).')
+    print(' -t,   -timing     Prints timing information about compilation and execution')
+    print(' -v,   -verbose    Prints the commands used to compile and execute the script (provide this argument')
+    print('                   twice if you want non-simplified commands).')
     sys.exit()
 
 def parse_args(args):
@@ -174,31 +174,31 @@ def parse_args(args):
     next(arg_it)  # skip command
 
     for x in arg_it:
-        if x == '-s':
+        if x == '-s' or x == '-setup':
             setup = next(arg_it)
             config['setup'] += setup.strip(';').split(';')
-        elif x == '-p':
+        elif x == '-p' or x == '-pretty':
             config['pretty'] = True
-        elif x == '-v':
+        elif x == '-v' or x == '-verbose':
             config['verbosity'] += 1
         elif x == '-vv':
             config['verbosity'] += 2
-        elif x == '-r':
+        elif x == '-r' or x == '-raw':
             config['raw'] = True
-        elif x == '-cp':
+        elif x == '-cp' or x == '-classpath':
             config['classpath'].append(next(arg_it))
-        elif x == '-h' or x == '--help':
+        elif x == '-h' or x == '-help' or x == '--help':
             help()
-        elif x == '-c':
+        elif x == '-c' or x == '-arg':
             config['java_args'].append(next(arg_it))
-        elif x == '-b':
+        elif x == '-b' or x == '-bytecode':
             config['bytecode'] = True
             config['raw'] = True
-        elif x == '-mvn':
+        elif x == '-mvn' or x == '-maven':
             config['mvn'].append(next(arg_it))
-        elif x == '-t':
+        elif x == '-t' or x == '-timing':
             config['timings'] = True
-        elif x == '-d':
+        elif x == '-d' or x == '-debug':
             config['debug'] = True
         else:
             code.append(x)
