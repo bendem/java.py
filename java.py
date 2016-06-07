@@ -25,12 +25,13 @@ config = {
     'java_args':  [],
     'bytecode':   False,
     'mvn':        [],
-    'javac_args': ['-nowarn'],
+    'javac_args': ['-nowarn', '-encoding', 'utf-8'],
     'timings':    False,
     'debug':      False,
 }
 
-OUT        = '/tmp/java.py'
+OUT        = os.path.join('/tmp' if os.name != 'nt' else os.getenv('temp'),
+                          'java.py')
 CLASS      = 'Paul%s' % int(random.random() * 100)
 SOURCE     = '%s.java' % CLASS
 COMPILED   = '%s.class' % CLASS
@@ -277,7 +278,7 @@ def write_to_file(file, content):
     if not os.path.exists(dirname):
         os.mkdir(dirname)
 
-    with open(file, 'w') as f:
+    with open(file, 'w', encoding='utf-8') as f:
         f.write(content)
 
 def which(name):
