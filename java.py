@@ -245,23 +245,9 @@ def generate_code(code, clazz, template, out_template=''):
     output = ''
 
     if not config['raw']:
-        if '=' in last_instr:
-            to_print = last_instr.split('=')[0].strip()
-
-            # Extracts var name from declarations like "int a"
-            # or "Map<String, String> a"
-            if ' ' in to_print:
-                r = re.compile(r'^.+\s+([^ ]+)$').match(to_print).group(1)
-                to_print = ' '.join(r)
-
-            code.append(to_print)
-            last_instr = to_print
-
-        # Auto display formatting thingy stuff
-        if not last_instr.startswith('p(') and last_instr != '}':
-            output = out_template % (code[-1],
-                    ('true' if config['pretty'] else 'false'))
-            del code[-1]
+        output = out_template % (code[-1],
+                ('true' if config['pretty'] else 'false'))
+        del code[-1]
 
     return template % (';'.join(config['setup']), clazz, clazz,
             ';'.join(code), output)
