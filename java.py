@@ -121,9 +121,9 @@ OUTPUT_CODE_TEMPLATE = """
         }
 
         if(ϟ == null) {
-            System.out.println("(" + ᴥ + ") " + ಠ_ಠ);
+            System.out.printf("(%%s) %%s", ᴥ, ಠ_ಠ);
         } else {
-            System.out.printf("(" + ᴥ + ") ");
+            System.out.printf("(%%s) ", ᴥ);
             System.out.println(
                 ϟ
                     .map(ツ -> {
