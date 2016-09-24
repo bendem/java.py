@@ -28,6 +28,41 @@ config = {
     'javac_args': ['-nowarn', '-encoding', 'utf-8'],
     'timings':    False,
     'debug':      False,
+    'pretty_imports': [
+        'java.util.Arrays',
+        'java.util.Map',
+        'java.util.Spliterator',
+        'java.util.stream.Collector',
+        'java.util.stream.Collectors',
+        'java.util.stream.DoubleStream',
+        'java.util.stream.IntStream',
+        'java.util.stream.LongStream',
+        'java.util.stream.Stream',
+        'java.util.stream.StreamSupport',
+    ],
+    'imports':    [
+        'java.io.*',
+        'java.lang.reflect.*',
+        'java.math.*',
+        'java.nio.*',
+        'java.nio.charset.*',
+        'java.nio.file.*',
+        'java.security.*',
+        'java.time.*',
+        'java.time.chrono.*',
+        'java.time.format.*',
+        'java.time.temporal.*',
+        'java.time.zone.*',
+        'java.util.*',
+        'java.util.concurrent.*',
+        'java.util.concurrent.atomic.*',
+        'java.util.concurrent.locks.*',
+        'java.util.function.*',
+        'java.util.regex.*',
+        'java.util.stream.*',
+        'javax.crypto.*',
+        'javax.crypto.spec.*',
+    ],
 }
 
 OUT        = os.path.join('/tmp' if os.name != 'nt' else os.getenv('temp'),
@@ -36,27 +71,7 @@ CLASS      = 'Paul%s' % int(random.random() * 100)
 SOURCE     = '%s.java' % CLASS
 COMPILED   = '%s.class' % CLASS
 TEMPLATE   = """
-import java.io.*;
-import java.lang.reflect.*;
-import java.math.*;
-import java.nio.*;
-import java.nio.charset.*;
-import java.nio.file.*;
-import java.security.*;
-import java.time.*;
-import java.time.chrono.*;
-import java.time.format.*;
-import java.time.temporal.*;
-import java.time.zone.*;
-import java.util.*;
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.*;
-import java.util.concurrent.locks.*;
-import java.util.function.*;
-import java.util.regex.*;
-import java.util.stream.*;
-import javax.crypto.*;
-import javax.crypto.spec.*;
+%s;
 %s;
 
 public class %s {
@@ -149,20 +164,23 @@ def help():
     print('Usage is ./java.py [options] <code>')
     print()
     print('Options')
-    print(' -b,   -bytecode   Prints the bytecode instead of executing the program (implies -r)')
-    print(' -d,   -debug      Prints the code compiled and executed (requires pygments installed)')
-    print(' -h,   -help       Prints this help message.')
-    print(' -p,   -pretty     Pretty output(in case of program result convertible to stream, each item will be')
-    print('                   printed on a new line).')
-    print(' -r,   -raw        Prevents adding some code to display the result of the last operation')
-    print('                   and replaces strip calls applied to each line of the program output with rstrip.')
-    print(' -t,   -timing     Prints timing information about compilation and execution')
-    print(' -v,   -verbose    Prints the commands used to compile and execute the script (provide this argument')
-    print('                   twice if you want non-simplified commands).')
+    print(' -b,   -bytecode      Prints the bytecode instead of executing the program (implies -r)')
+    print(' -d,   -debug         Prints the code compiled and executed (requires pygments installed)')
+    print(' -h,   -help          Prints this help message.')
+    print(' -ci   -clear-imports Clear the list of imports (also clear the default imports) (not that if you ')
+    print('                      don\'t use raw mode, the imports for the formatting code are still included)')
+    print(' -p,   -pretty        Pretty output(in case of program result convertible to stream, each item will be')
+    print('                      printed on a new line).')
+    print(' -r,   -raw           Prevents adding some code to display the result of the last operation')
+    print('                      and replaces strip calls applied to each line of the program output with rstrip.')
+    print(' -t,   -timing        Prints timing information about compilation and execution')
+    print(' -v,   -verbose       Prints the commands used to compile and execute the script (provide this argument')
+    print('                      twice if you want non-simplified commands).')
     print()
     print('Options with value')
     print(' -c,   -arg        Parameters to add to the java invocation')
     print(' -cp,  -classpath  Adds a jar to the classpath.')
+    print(' -i    -import     Add the value to the list of imports')
     print(' -mvn, -maven      Adds maven dependencies of a project to the runtime classpath')
     print(' -s,   -setup      Setup code to put before the class declaration (i.e. imports or class definitions).')
     sys.exit()
@@ -203,6 +221,10 @@ def parse_args(args):
             config['timings'] = True
         elif x == '-d' or x == '-debug':
             config['debug'] = True
+        elif x == '-ci' or x == '-clear-imports':
+            config['imports'] = []
+        elif x == '-i' or x == '-import':
+            config['imports'].append(next(arg_it))
         else:
             code.append(x)
 
@@ -210,6 +232,15 @@ def parse_args(args):
         help()
 
     return code, config
+
+def deduplicate(list):
+    seen = set()
+    out = []
+    for x in list:
+        if not x in seen:
+            seen.add(x)
+            out.append(x)
+    return out
 
 def log(command):
     if not config['verbosity']:
@@ -244,13 +275,22 @@ def generate_code(code, clazz, template, out_template=''):
     last_instr = code[-1].strip()
     output = ''
 
+    imports = []
     if not config['raw']:
+        imports = config['pretty_imports']
+
         output = out_template % (code[-1],
                 ('true' if config['pretty'] else 'false'))
         del code[-1]
 
-    return template % (';'.join(config['setup']), clazz, clazz,
-            ';'.join(code), output)
+    imports += config['imports']
+
+    return template % (
+        '\n'.join('import %s;' % i for i in imports),
+        ';'.join(config['setup']),
+        clazz,
+        clazz,
+        ';'.join(code), output)
 
 def display_code(code):
     if not pygments_available:
