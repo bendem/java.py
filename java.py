@@ -271,7 +271,7 @@ def log(command):
 def generate_code(code, clazz, template, out_template=''):
     # Splitting on ; is really horrible and breaks in many cases but
     # it's a fair trade compared to the complexity of writing a parser
-    code = code.strip(';').split(';')
+    code = code.strip().strip(';').split(';')
     last_instr = code[-1].strip()
     output = ''
 
