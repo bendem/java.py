@@ -138,25 +138,37 @@ OUTPUT_CODE_TEMPLATE = """
         if(ϟ == null) {
             System.out.printf("(%%s) %%s", ᴥ, ಠ_ಠ);
         } else {
-            System.out.printf("(%%s) ", ᴥ);
-            System.out.println(
-                ϟ
-                    .map(ツ -> {
-                        if(ツ == null) {
-                            return "null";
-                        }
-                        if(ツ instanceof Character) {
-                            return "'" + ツ + "'";
-                        }
-                        if(ツ instanceof Number) {
-                            return ツ.toString();
-                        }
-                        return "\\"" + ツ + '"';
-                    })
-                    .collect((Collector<CharSequence, ?, String>) (%s
-                        ? Collectors.joining(",\\n", "[\\n", "\\n]")
-                        : Collectors.joining(", ", "[", "]")))
-            );
+            String separator;
+            if (%s) {
+                separator = ",\\n";
+            } else {
+                separator = ", ";
+            }
+
+            boolean[] first = { true };
+            System.out.printf("(%%s) [", ᴥ);
+            ϟ
+                .map(ツ -> {
+                    if(ツ == null) {
+                        return "null";
+                    }
+                    if(ツ instanceof Character) {
+                        return "'" + ツ + "'";
+                    }
+                    if(ツ instanceof Number) {
+                        return ツ.toString();
+                    }
+                    return "\\"" + ツ + '"';
+                })
+                .forEach(ツ -> {
+                    if (first[0]) {
+                        first[0] = false;
+                    } else {
+                        System.out.print(separator);
+                    }
+                    System.out.print(ツ);
+                });
+            System.out.print("]");
         }
 """
 
