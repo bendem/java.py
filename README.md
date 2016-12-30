@@ -23,7 +23,7 @@ $ java.py "new Object[]{1, \"a\", null, 'a'}"
  >> (java.util.HashSet) ["hello", "world!"]
 ```
 
-Missing an import? You can add content at the start of the generated file with `-s`:
+Missing an import? You can add content at the start of the generated file with `-i`:
 ```sh
 $ java.py -i java.time.Instant 'Instant.now()'
  >> (java.time.Instant) 2016-02-29T12:44:54.870Z
